@@ -46,6 +46,14 @@ async def customer_flow(message: types.Message):
     user_id = message.from_user.id
     chat_id = message.chat.id
 
+    text = (message.text or "").strip()
+    if not text:
+        return
+
+    # игнорируем команды, чтобы их обрабатывали другие хендлеры (/orders, /me и т.п.)
+    if text.startswith("/"):
+        return
+
     # 1. Проверяем роль
     role = await get_user_role(user_id)
     if role != "customer":
@@ -122,3 +130,6 @@ async def customer_flow(message: types.Message):
     await delete_session(chat_id)
     await message.answer("Что-то пошло не так, давайте начнём оформление заказа заново.\nЧто везём?")
     await save_session(chat_id, "ask_cargo", {})
+
+def register_customer(dp):
+        dp.include_router(router)
